@@ -1,0 +1,97 @@
+import java.util.Properties
+import java.util.Base64
+
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+
+def keystoreBase64 = System.getenv("KEYSTORE_BASE64") ?: localProperties.getProperty("KEYSTORE_BASE64") ?: project.findProperty("KEYSTORE_BASE64")
+def keystorePassword = System.getenv("KEYSTORE_PASSWORD") ?: localProperties.getProperty("KEYSTORE_PASSWORD") ?: project.findProperty("KEYSTORE_PASSWORD")
+def keyAliasStr = System.getenv("KEY_ALIAS") ?: localProperties.getProperty("KEY_ALIAS") ?: project.findProperty("KEY_ALIAS")
+def keyPasswordStr = System.getenv("KEY_PASSWORD") ?: localProperties.getProperty("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD")
+
+def ksFile = null
+if (keystoreBase64) {
+    def decodedBytes = Base64.decoder.decode(keystoreBase64.trim().replace("\n", "").replace("\r", ""))
+    ksFile = file("${layout.buildDirectory.get().asFile}/keystore.jks")
+    ksFile.parentFile.mkdirs()
+    ksFile.bytes = decodedBytes
+}
+
+android {
+    namespace 'com.hamraj37.explayer'
+    compileSdk 37
+
+    defaultConfig {
+        applicationId "com.hamraj37.explayer"
+        minSdk 29
+        targetSdk 37
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        customSigning {
+            if (ksFile != null && ksFile.exists()) {
+                storeFile ksFile
+                storePassword keystorePassword
+                keyAlias keyAliasStr
+                keyPassword keyPasswordStr
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            if (ksFile != null && ksFile.exists()) {
+                signingConfig signingConfigs.customSigning
+            }
+        }
+        release {
+            if (ksFile != null && ksFile.exists()) {
+                signingConfig signingConfigs.customSigning
+            }
+            optimization {
+                enable true
+                packageScope = ["androidx.**"]
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.androidx.core
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.swiperefreshlayout
+    implementation libs.androidx.cardview
+    implementation libs.androidx.media3.exoplayer
+    implementation libs.androidx.media3.ui
+    implementation libs.androidx.media3.session
+    implementation libs.glide
+    implementation libs.androidx.lifecycle.viewmodel
+    implementation libs.androidx.lifecycle.livedata
+
+    testImplementation libs.androidx.test.core
+    testImplementation libs.androidx.junit
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.runner
+}
