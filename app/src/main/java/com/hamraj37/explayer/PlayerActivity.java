@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.util.Rational;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -134,6 +135,9 @@ public class PlayerActivity extends AppCompatActivity {
     // Audio & Window Managers
     private AudioManager audioManager;
     private GestureDetector gestureDetector;
+    private ScaleGestureDetector scaleGestureDetector;
+    private float videoScaleFactor = 1.0f;
+    private boolean isPinching = false;
 
     // Auto-Hide & Progress Update Handlers
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -474,6 +478,12 @@ public class PlayerActivity extends AppCompatActivity {
 
             @Override
             public boolean onDoubleTap(@NonNull MotionEvent e) {
+                if (videoScaleFactor != 1.0f) {
+                    resetVideoZoom();
+                    showIndicatorPopup(R.drawable.ic_aspect_ratio, "Zoom", 20, "100% (Reset)");
+                    hideIndicatorWithDelay();
+                    return true;
+                }
                 float x = e.getX();
                 int width = gestureOverlay.getWidth();
                 if (width <= 0) width = getResources().getDisplayMetrics().widthPixels;
@@ -503,7 +513,7 @@ public class PlayerActivity extends AppCompatActivity {
 
             @Override
             public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
-                if (e1 == null) return false;
+                if (e1 == null || isPinching) return false;
                 float deltaX = e2.getX() - e1.getX();
                 float deltaY = e2.getY() - e1.getY();
 
@@ -530,9 +540,64 @@ public class PlayerActivity extends AppCompatActivity {
         gestureDetector = new GestureDetector(this, doubleTapListener);
         gestureDetector.setOnDoubleTapListener(doubleTapListener);
 
+        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
+                isPinching = true;
+                return true;
+            }
+
+            @Override
+            public boolean onScale(@NonNull ScaleGestureDetector detector) {
+                float scaleFactor = detector.getScaleFactor();
+                videoScaleFactor *= scaleFactor;
+                videoScaleFactor = Math.max(0.5f, Math.min(5.0f, videoScaleFactor));
+
+                if (Math.abs(videoScaleFactor - 1.0f) < 0.05f) {
+                    videoScaleFactor = 1.0f;
+                }
+
+                if (playerView != null) {
+                    playerView.setPivotX(playerView.getWidth() / 2f);
+                    playerView.setPivotY(playerView.getHeight() / 2f);
+                    playerView.setTranslationX(0f);
+                    playerView.setTranslationY(0f);
+                    playerView.setScaleX(videoScaleFactor);
+                    playerView.setScaleY(videoScaleFactor);
+                }
+
+                int zoomPercent = (int) (videoScaleFactor * 100);
+                showIndicatorPopup(R.drawable.ic_aspect_ratio, "Zoom", Math.min(100, (int) ((videoScaleFactor / 5.0f) * 100)), zoomPercent + "%");
+                return true;
+            }
+
+            @Override
+            public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
+                hideIndicatorWithDelay();
+            }
+        });
+
         gestureOverlay.setOnTouchListener((v, event) -> {
+            int action = event.getActionMasked();
+
+            if (event.getPointerCount() >= 2) {
+                isPinching = true;
+                scaleGestureDetector.onTouchEvent(event);
+                return true;
+            }
+
+            if (isPinching) {
+                if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_POINTER_UP) {
+                    if (event.getPointerCount() <= 1) {
+                        isPinching = false;
+                        hideIndicatorWithDelay();
+                    }
+                }
+                return true;
+            }
+
             boolean handled = gestureDetector.onTouchEvent(event);
-            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 if (isHorizontalScroll && player != null) {
                     player.seekTo(targetSeekPosition);
                     hideIndicatorWithDelay();
@@ -845,7 +910,20 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+    private void resetVideoZoom() {
+        videoScaleFactor = 1.0f;
+        if (playerView != null) {
+            playerView.setPivotX(playerView.getWidth() / 2f);
+            playerView.setPivotY(playerView.getHeight() / 2f);
+            playerView.setScaleX(1.0f);
+            playerView.setScaleY(1.0f);
+            playerView.setTranslationX(0f);
+            playerView.setTranslationY(0f);
+        }
+    }
+
     private void toggleAspectRatio() {
+        resetVideoZoom();
         currentResizeModeIndex = (currentResizeModeIndex + 1) % RESIZE_MODES.length;
         playerView.setResizeMode(RESIZE_MODES[currentResizeModeIndex]);
         String modeName = getString(RESIZE_MODE_STRINGS[currentResizeModeIndex]);
