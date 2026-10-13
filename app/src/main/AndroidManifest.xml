@@ -36,6 +36,7 @@
             android:name=".PlayerActivity"
             android:exported="false"
             android:label="@string/player_title"
+            android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.eXPlayer" />

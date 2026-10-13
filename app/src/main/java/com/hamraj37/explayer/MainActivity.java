@@ -311,8 +311,11 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
 
     private boolean hasRequiredPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO)
+            boolean mediaGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO)
                     == PackageManager.PERMISSION_GRANTED;
+            boolean notifyGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
+            return mediaGranted && notifyGranted;
         } else {
             return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED;
@@ -321,7 +324,10 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
 
     private void requestRequiredPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionLauncher.launch(new String[]{Manifest.permission.READ_MEDIA_VIDEO});
+            permissionLauncher.launch(new String[]{
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.POST_NOTIFICATIONS
+            });
         } else {
             permissionLauncher.launch(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE});
         }
@@ -439,18 +445,24 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
 
         if (videoAdapter != null && videoAdapter.getItemCount() > 0) {
             List<VideoItem> currentList = videoAdapter.getFilteredList();
-            ArrayList<String> uriPlaylist = new ArrayList<>();
-            int matchedIndex = -1;
-            for (int i = 0; i < currentList.size(); i++) {
-                VideoItem item = currentList.get(i);
-                uriPlaylist.add(item.getUriString());
-                if (lastUri.equals(item.getUriString())) {
-                    matchedIndex = i;
+            if (currentList != null && !currentList.isEmpty()) {
+                ArrayList<String> uriPlaylist = new ArrayList<>();
+                int matchedIndex = -1;
+                for (int i = 0; i < currentList.size(); i++) {
+                    VideoItem item = currentList.get(i);
+                    if (item != null && item.getUriString() != null) {
+                        uriPlaylist.add(item.getUriString());
+                        if (lastUri.equals(item.getUriString())) {
+                            matchedIndex = i;
+                        }
+                    }
                 }
-            }
-            intent.putStringArrayListExtra(PlayerActivity.EXTRA_VIDEO_PLAYLIST, uriPlaylist);
-            if (matchedIndex != -1) {
-                intent.putExtra(PlayerActivity.EXTRA_VIDEO_INDEX, matchedIndex);
+                if (!uriPlaylist.isEmpty()) {
+                    intent.putStringArrayListExtra(PlayerActivity.EXTRA_VIDEO_PLAYLIST, uriPlaylist);
+                    if (matchedIndex != -1) {
+                        intent.putExtra(PlayerActivity.EXTRA_VIDEO_INDEX, matchedIndex);
+                    }
+                }
             }
         }
 
@@ -473,7 +485,9 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
         ArrayList<String> uriPlaylist = new ArrayList<>();
         if (currentList != null) {
             for (VideoItem item : currentList) {
-                uriPlaylist.add(item.getUriString());
+                if (item != null && item.getUriString() != null) {
+                    uriPlaylist.add(item.getUriString());
+                }
             }
         }
         intent.putStringArrayListExtra(PlayerActivity.EXTRA_VIDEO_PLAYLIST, uriPlaylist);

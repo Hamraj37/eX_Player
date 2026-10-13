@@ -212,6 +212,22 @@ public class PlayerActivity extends AppCompatActivity {
         showControls();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (intent != null && intent.hasExtra(EXTRA_VIDEO_URI)) {
+            String newUri = intent.getStringExtra(EXTRA_VIDEO_URI);
+            MediaItem currentItem = player != null ? player.getCurrentMediaItem() : null;
+            String currentUri = (currentItem != null && currentItem.localConfiguration != null && currentItem.localConfiguration.uri != null)
+                    ? currentItem.localConfiguration.uri.toString() : null;
+
+            if (currentUri == null || !currentUri.equals(newUri)) {
+                loadIntentData();
+            }
+        }
+    }
+
     private void registerPipReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_PIP_PLAY);
@@ -299,10 +315,12 @@ public class PlayerActivity extends AppCompatActivity {
         player.setAudioAttributes(audioAttributes, /* handleAudioFocus= */ true);
         playerView.setPlayer(player);
 
+        Intent launchIntent = new Intent(this, PlayerActivity.class);
+        launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent sessionActivityPendingIntent = PendingIntent.getActivity(
                 this,
                 0,
-                new Intent(this, PlayerActivity.class),
+                launchIntent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
         );
 
@@ -325,6 +343,13 @@ public class PlayerActivity extends AppCompatActivity {
                 }
                 updatePipParams();
                 resetAutoHideTimer();
+
+                if (isBackgroundPlayEnabled) {
+                    try {
+                        Intent serviceIntent = new Intent(PlayerActivity.this, BackgroundPlaybackService.class);
+                        ContextCompat.startForegroundService(PlayerActivity.this, serviceIntent);
+                    } catch (Exception ignored) {}
+                }
             }
 
             @Override
@@ -335,9 +360,13 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onMediaItemTransition(MediaItem mediaItem, int reason) {
                 if (mediaItem != null) {
-                    String uriString = mediaItem.localConfiguration != null ? mediaItem.localConfiguration.uri.toString() : null;
-                    String title = mediaItem.mediaMetadata.title != null ? mediaItem.mediaMetadata.title.toString() : null;
-                    tvPlayerTitle.setText(getTitleFromUri(uriString, title));
+                    String uriString = (mediaItem.localConfiguration != null && mediaItem.localConfiguration.uri != null)
+                            ? mediaItem.localConfiguration.uri.toString() : null;
+                    String title = (mediaItem.mediaMetadata != null && mediaItem.mediaMetadata.title != null)
+                            ? mediaItem.mediaMetadata.title.toString() : null;
+                    if (tvPlayerTitle != null) {
+                        tvPlayerTitle.setText(getTitleFromUri(uriString, title));
+                    }
                 }
                 updatePipParams();
             }
@@ -353,6 +382,9 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private MediaItem createMediaItem(String uriString, String title) {
+        if (uriString == null || uriString.trim().isEmpty()) {
+            return MediaItem.EMPTY;
+        }
         String displayTitle = getTitleFromUri(uriString, title);
         Uri uri = Uri.parse(uriString);
 
@@ -380,19 +412,23 @@ public class PlayerActivity extends AppCompatActivity {
         ArrayList<String> playlist = intent.getStringArrayListExtra(EXTRA_VIDEO_PLAYLIST);
 
         if (title != null && !title.isEmpty()) {
-            tvPlayerTitle.setText(title);
+            if (tvPlayerTitle != null) tvPlayerTitle.setText(title);
         } else if (uriString != null) {
-            tvPlayerTitle.setText(getTitleFromUri(uriString, null));
+            if (tvPlayerTitle != null) tvPlayerTitle.setText(getTitleFromUri(uriString, null));
         }
 
         if (playlist != null && !playlist.isEmpty()) {
             List<MediaItem> mediaItems = new ArrayList<>();
             for (String uri : playlist) {
-                mediaItems.add(createMediaItem(uri, null));
+                if (uri != null && !uri.trim().isEmpty()) {
+                    mediaItems.add(createMediaItem(uri, null));
+                }
             }
-            int safeIndex = Math.max(0, Math.min(initialIndex, mediaItems.size() - 1));
-            player.setMediaItems(mediaItems, safeIndex, startPosition > 0 ? startPosition : C.TIME_UNSET);
-        } else if (uriString != null && !uriString.isEmpty()) {
+            if (!mediaItems.isEmpty()) {
+                int safeIndex = Math.max(0, Math.min(initialIndex, mediaItems.size() - 1));
+                player.setMediaItems(mediaItems, safeIndex, startPosition > 0 ? startPosition : C.TIME_UNSET);
+            }
+        } else if (uriString != null && !uriString.trim().isEmpty()) {
             player.setMediaItem(createMediaItem(uriString, title));
             if (startPosition > 0) {
                 player.seekTo(startPosition);
@@ -401,7 +437,6 @@ public class PlayerActivity extends AppCompatActivity {
 
         player.prepare();
         player.setPlayWhenReady(true);
-        saveLastPlayedVideo();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -716,14 +751,14 @@ public class PlayerActivity extends AppCompatActivity {
                 long duration = player.getDuration();
                 if (duration > 0) {
                     int progress = (int) ((currentPos * 1000L) / duration);
-                    seekBar.setProgress(progress);
-                    tvCurrentTime.setText(formatTime(currentPos));
-                    tvTotalTime.setText(formatTime(duration));
-                    tvDuration.setText(formatTime(currentPos) + " / " + formatTime(duration));
+                    if (seekBar != null) seekBar.setProgress(progress);
+                    if (tvCurrentTime != null) tvCurrentTime.setText(formatTime(currentPos));
+                    if (tvTotalTime != null) tvTotalTime.setText(formatTime(duration));
+                    if (tvDuration != null) tvDuration.setText(formatTime(currentPos) + " / " + formatTime(duration));
                 } else {
-                    tvCurrentTime.setText(formatTime(currentPos));
-                    tvTotalTime.setText("00:00");
-                    tvDuration.setText(formatTime(currentPos) + " / 00:00");
+                    if (tvCurrentTime != null) tvCurrentTime.setText(formatTime(currentPos));
+                    if (tvTotalTime != null) tvTotalTime.setText("00:00");
+                    if (tvDuration != null) tvDuration.setText(formatTime(currentPos) + " / 00:00");
                 }
             }
             if (player != null && player.isPlaying()) {
@@ -1129,6 +1164,24 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         updatePipParams();
+        try {
+            Intent serviceIntent = new Intent(this, BackgroundPlaybackService.class);
+            stopService(serviceIntent);
+        } catch (Exception ignored) {}
+
+        if (playerView != null && player != null) {
+            playerView.setPlayer(player);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideSystemUI();
+        if (playerView != null && player != null) {
+            playerView.setPlayer(player);
+            playerView.onResume();
+        }
     }
 
     private void saveLastPlayedVideo() {
@@ -1139,7 +1192,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         String uriString = null;
         MediaItem currentItem = player.getCurrentMediaItem();
-        if (currentItem != null && currentItem.localConfiguration != null) {
+        if (currentItem != null && currentItem.localConfiguration != null && currentItem.localConfiguration.uri != null) {
             uriString = currentItem.localConfiguration.uri.toString();
         } else if (getIntent() != null) {
             uriString = getIntent().getStringExtra(EXTRA_VIDEO_URI);
