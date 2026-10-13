@@ -39,7 +39,7 @@
 
         </FrameLayout>
 
-        <TextView
+        <com.hamraj37.explayer.ui.MarqueeTextView
             android:id="@+id/tvPlayerTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -106,6 +106,25 @@
                 android:contentDescription="@string/cd_aspect_ratio"
                 android:padding="6dp"
                 android:src="@drawable/ic_aspect_ratio"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnImmersive"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_immersive_display">
+
+            <ImageView
+                android:id="@+id/ivImmersive"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_immersive_display"
+                android:padding="6dp"
+                android:src="@drawable/ic_immersive"
                 app:tint="@color/white" />
 
         </FrameLayout>

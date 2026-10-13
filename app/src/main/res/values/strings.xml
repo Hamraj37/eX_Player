@@ -65,4 +65,7 @@
     <string name="cd_forward_10">Forward 10 seconds</string>
     <string name="cd_orientation_change">Change Orientation</string>
     <string name="cd_pip">Picture in Picture</string>
+    <string name="cd_immersive_display">Immersive Display</string>
+    <string name="immersive_display_enabled">Immersive Display Enabled</string>
+    <string name="immersive_display_disabled">Immersive Display Disabled</string>
 </resources>

@@ -447,21 +447,22 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
             List<VideoItem> currentList = videoAdapter.getFilteredList();
             if (currentList != null && !currentList.isEmpty()) {
                 ArrayList<String> uriPlaylist = new ArrayList<>();
+                ArrayList<String> titlePlaylist = new ArrayList<>();
                 int matchedIndex = -1;
                 for (int i = 0; i < currentList.size(); i++) {
                     VideoItem item = currentList.get(i);
                     if (item != null && item.getUriString() != null) {
                         uriPlaylist.add(item.getUriString());
+                        titlePlaylist.add(item.getTitle() != null ? item.getTitle() : "");
                         if (lastUri.equals(item.getUriString())) {
                             matchedIndex = i;
                         }
                     }
                 }
-                if (!uriPlaylist.isEmpty()) {
+                if (matchedIndex != -1 && !uriPlaylist.isEmpty()) {
                     intent.putStringArrayListExtra(PlayerActivity.EXTRA_VIDEO_PLAYLIST, uriPlaylist);
-                    if (matchedIndex != -1) {
-                        intent.putExtra(PlayerActivity.EXTRA_VIDEO_INDEX, matchedIndex);
-                    }
+                    intent.putStringArrayListExtra(PlayerActivity.EXTRA_VIDEO_TITLE_PLAYLIST, titlePlaylist);
+                    intent.putExtra(PlayerActivity.EXTRA_VIDEO_INDEX, matchedIndex);
                 }
             }
         }
@@ -483,14 +484,17 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
         intent.putExtra(PlayerActivity.EXTRA_VIDEO_INDEX, position);
 
         ArrayList<String> uriPlaylist = new ArrayList<>();
+        ArrayList<String> titlePlaylist = new ArrayList<>();
         if (currentList != null) {
             for (VideoItem item : currentList) {
                 if (item != null && item.getUriString() != null) {
                     uriPlaylist.add(item.getUriString());
+                    titlePlaylist.add(item.getTitle() != null ? item.getTitle() : "");
                 }
             }
         }
         intent.putStringArrayListExtra(PlayerActivity.EXTRA_VIDEO_PLAYLIST, uriPlaylist);
+        intent.putStringArrayListExtra(PlayerActivity.EXTRA_VIDEO_TITLE_PLAYLIST, titlePlaylist);
 
         startActivity(intent);
     }

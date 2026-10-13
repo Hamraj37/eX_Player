@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -21,6 +22,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.util.Rational;
 import android.view.GestureDetector;
@@ -75,6 +78,7 @@ public class PlayerActivity extends AppCompatActivity {
     public static final String EXTRA_VIDEO_TITLE = "extra_video_title";
     public static final String EXTRA_VIDEO_INDEX = "extra_video_index";
     public static final String EXTRA_VIDEO_PLAYLIST = "extra_video_playlist";
+    public static final String EXTRA_VIDEO_TITLE_PLAYLIST = "extra_video_title_playlist";
     public static final String EXTRA_START_POSITION = "extra_start_position";
 
     public static final String ACTION_PIP_PLAY = "com.hamraj37.explayer.PIP_PLAY";
@@ -94,7 +98,10 @@ public class PlayerActivity extends AppCompatActivity {
     private View btnSubtitle;
     private View btnAudioTrack;
     private View btnAspectRatio;
+    private View btnImmersive;
+    private ImageView ivImmersive;
     private View btnSpeed;
+    private boolean isImmersiveDisplayEnabled = false;
 
     private View btnPrev;
     private View btnRewind10;
@@ -202,7 +209,10 @@ public class PlayerActivity extends AppCompatActivity {
             });
         }
 
-        hideSystemUI();
+        SharedPreferences prefs = getSharedPreferences("EXPlayerPrefs", MODE_PRIVATE);
+        isImmersiveDisplayEnabled = prefs.getBoolean("immersive_display_enabled", false);
+
+        applyImmersiveDisplayMode();
         initViews();
         setupGestureDetector();
         initExoPlayer();
@@ -255,7 +265,12 @@ public class PlayerActivity extends AppCompatActivity {
         btnSubtitle = controlsOverlay.findViewById(R.id.btnSubtitle);
         btnAudioTrack = controlsOverlay.findViewById(R.id.btnAudioTrack);
         btnAspectRatio = controlsOverlay.findViewById(R.id.btnAspectRatio);
+        btnImmersive = controlsOverlay.findViewById(R.id.btnImmersive);
+        if (btnImmersive != null) {
+            ivImmersive = btnImmersive.findViewById(R.id.ivImmersive);
+        }
         btnSpeed = controlsOverlay.findViewById(R.id.btnSpeed);
+        updateImmersiveDisplayUI();
 
         // Center Actions
         btnPrev = controlsOverlay.findViewById(R.id.btnPrev);
@@ -364,9 +379,7 @@ public class PlayerActivity extends AppCompatActivity {
                             ? mediaItem.localConfiguration.uri.toString() : null;
                     String title = (mediaItem.mediaMetadata != null && mediaItem.mediaMetadata.title != null)
                             ? mediaItem.mediaMetadata.title.toString() : null;
-                    if (tvPlayerTitle != null) {
-                        tvPlayerTitle.setText(getTitleFromUri(uriString, title));
-                    }
+                    setPlayerTitle(getTitleFromUri(uriString, title));
                 }
                 updatePipParams();
             }
@@ -401,6 +414,14 @@ public class PlayerActivity extends AppCompatActivity {
                 .build();
     }
 
+    private void setPlayerTitle(String title) {
+        if (tvPlayerTitle != null) {
+            tvPlayerTitle.setText(title);
+            tvPlayerTitle.setSelected(true);
+            tvPlayerTitle.requestFocus();
+        }
+    }
+
     private void loadIntentData() {
         Intent intent = getIntent();
         if (intent == null) return;
@@ -410,18 +431,21 @@ public class PlayerActivity extends AppCompatActivity {
         int initialIndex = intent.getIntExtra(EXTRA_VIDEO_INDEX, 0);
         long startPosition = intent.getLongExtra(EXTRA_START_POSITION, 0L);
         ArrayList<String> playlist = intent.getStringArrayListExtra(EXTRA_VIDEO_PLAYLIST);
+        ArrayList<String> titlePlaylist = intent.getStringArrayListExtra(EXTRA_VIDEO_TITLE_PLAYLIST);
 
         if (title != null && !title.isEmpty()) {
-            if (tvPlayerTitle != null) tvPlayerTitle.setText(title);
+            setPlayerTitle(title);
         } else if (uriString != null) {
-            if (tvPlayerTitle != null) tvPlayerTitle.setText(getTitleFromUri(uriString, null));
+            setPlayerTitle(getTitleFromUri(uriString, null));
         }
 
         if (playlist != null && !playlist.isEmpty()) {
             List<MediaItem> mediaItems = new ArrayList<>();
-            for (String uri : playlist) {
+            for (int i = 0; i < playlist.size(); i++) {
+                String uri = playlist.get(i);
+                String itemTitle = (titlePlaylist != null && i < titlePlaylist.size()) ? titlePlaylist.get(i) : null;
                 if (uri != null && !uri.trim().isEmpty()) {
-                    mediaItems.add(createMediaItem(uri, null));
+                    mediaItems.add(createMediaItem(uri, itemTitle));
                 }
             }
             if (!mediaItems.isEmpty()) {
@@ -686,6 +710,13 @@ public class PlayerActivity extends AppCompatActivity {
             toggleAspectRatio();
         });
 
+        if (btnImmersive != null) {
+            btnImmersive.setOnClickListener(v -> {
+                resetAutoHideTimer();
+                toggleImmersiveDisplay();
+            });
+        }
+
         btnSpeed.setOnClickListener(v -> {
             resetAutoHideTimer();
             showPlaybackSpeedDialog();
@@ -819,6 +850,44 @@ public class PlayerActivity extends AppCompatActivity {
         playerView.setResizeMode(RESIZE_MODES[currentResizeModeIndex]);
         String modeName = getString(RESIZE_MODE_STRINGS[currentResizeModeIndex]);
         Toast.makeText(this, "Aspect Ratio: " + modeName, Toast.LENGTH_SHORT).show();
+    }
+
+    private void toggleImmersiveDisplay() {
+        isImmersiveDisplayEnabled = !isImmersiveDisplayEnabled;
+
+        SharedPreferences prefs = getSharedPreferences("EXPlayerPrefs", MODE_PRIVATE);
+        prefs.edit().putBoolean("immersive_display_enabled", isImmersiveDisplayEnabled).apply();
+
+        applyImmersiveDisplayMode();
+        updateImmersiveDisplayUI();
+
+        String msg = isImmersiveDisplayEnabled ?
+                getString(R.string.immersive_display_enabled) :
+                getString(R.string.immersive_display_disabled);
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private void applyImmersiveDisplayMode() {
+        hideSystemUI();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            if (isImmersiveDisplayEnabled) {
+                lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            } else {
+                lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+            }
+            getWindow().setAttributes(lp);
+        }
+    }
+
+    private void updateImmersiveDisplayUI() {
+        if (ivImmersive != null) {
+            if (isImmersiveDisplayEnabled) {
+                ivImmersive.setColorFilter(ContextCompat.getColor(this, R.color.liquid_cyan));
+            } else {
+                ivImmersive.setColorFilter(ContextCompat.getColor(this, R.color.white));
+            }
+        }
     }
 
     private void changeOrientation() {
@@ -1131,17 +1200,43 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private String getTitleFromUri(String uriStr, String fallbackTitle) {
-        if (fallbackTitle != null && !fallbackTitle.trim().isEmpty()) {
+        if (fallbackTitle != null && !fallbackTitle.trim().isEmpty() && !fallbackTitle.matches("^\\d+$")) {
             return fallbackTitle;
         }
-        if (uriStr != null) {
+        if (uriStr != null && !uriStr.trim().isEmpty()) {
             try {
                 Uri uri = Uri.parse(uriStr);
+                if ("content".equalsIgnoreCase(uri.getScheme())) {
+                    try (Cursor cursor = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME, MediaStore.Video.Media.TITLE}, null, null, null)) {
+                        if (cursor != null && cursor.moveToFirst()) {
+                            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                            if (nameIndex != -1) {
+                                String displayName = cursor.getString(nameIndex);
+                                if (displayName != null && !displayName.trim().isEmpty()) {
+                                    return displayName;
+                                }
+                            }
+                            int titleIndex = cursor.getColumnIndex(MediaStore.Video.Media.TITLE);
+                            if (titleIndex != -1) {
+                                String mediaTitle = cursor.getString(titleIndex);
+                                if (mediaTitle != null && !mediaTitle.trim().isEmpty()) {
+                                    return mediaTitle;
+                                }
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                }
                 String path = uri.getPath();
                 if (path != null && path.contains("/")) {
-                    return path.substring(path.lastIndexOf('/') + 1);
+                    String fileName = path.substring(path.lastIndexOf('/') + 1);
+                    if (!fileName.matches("^\\d+$")) {
+                        return Uri.decode(fileName);
+                    }
                 }
             } catch (Exception ignored) {}
+        }
+        if (fallbackTitle != null && !fallbackTitle.trim().isEmpty()) {
+            return fallbackTitle;
         }
         return "Video";
     }
@@ -1177,10 +1272,18 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        hideSystemUI();
+        applyImmersiveDisplayMode();
         if (playerView != null && player != null) {
             playerView.setPlayer(player);
             playerView.onResume();
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            applyImmersiveDisplayMode();
         }
     }
 
@@ -1219,7 +1322,7 @@ public class PlayerActivity extends AppCompatActivity {
             return;
         }
 
-        if (isBackgroundPlayEnabled && player != null && player.isPlaying()) {
+        if (!isFinishing() && isBackgroundPlayEnabled && player != null && player.isPlaying()) {
             try {
                 Intent serviceIntent = new Intent(this, BackgroundPlaybackService.class);
                 ContextCompat.startForegroundService(this, serviceIntent);
