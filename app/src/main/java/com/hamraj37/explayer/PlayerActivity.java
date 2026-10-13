@@ -360,6 +360,7 @@ public class PlayerActivity extends AppCompatActivity {
                     if (ivPlayPause != null) ivPlayPause.setImageResource(R.drawable.ic_play);
                     mainHandler.removeCallbacks(updateProgressRunnable);
                 }
+                updateKeepScreenOn();
                 updatePipParams();
                 resetAutoHideTimer();
 
@@ -393,6 +394,7 @@ public class PlayerActivity extends AppCompatActivity {
                 if (playbackState == Player.STATE_READY) {
                     updateDurationUI();
                 }
+                updateKeepScreenOn();
                 updatePipParams();
             }
         });
@@ -1347,6 +1349,26 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+    private void updateKeepScreenOn() {
+        boolean shouldKeepScreenOn = false;
+        if (player != null) {
+            int state = player.getPlaybackState();
+            boolean playWhenReady = player.getPlayWhenReady();
+            boolean isPlaying = player.isPlaying();
+            if (isPlaying || (playWhenReady && (state == Player.STATE_BUFFERING || state == Player.STATE_READY))) {
+                shouldKeepScreenOn = true;
+            }
+        }
+        if (playerView != null) {
+            playerView.setKeepScreenOn(shouldKeepScreenOn);
+        }
+        if (shouldKeepScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -1355,6 +1377,7 @@ public class PlayerActivity extends AppCompatActivity {
             playerView.setPlayer(player);
             playerView.onResume();
         }
+        updateKeepScreenOn();
     }
 
     @Override
@@ -1396,6 +1419,9 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         saveLastPlayedVideo();
+        if (player == null || !player.isPlaying()) {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isInPictureInPictureMode()) {
             return;
         }
@@ -1414,6 +1440,7 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         saveLastPlayedVideo();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isInPictureInPictureMode()) {
             return;
         }
