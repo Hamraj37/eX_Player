@@ -2,6 +2,12 @@ name: Android Release APK
 
 on:
   workflow_dispatch:
+    inputs:
+      whats_new:
+        description: "What's new in this release"
+        required: false
+        type: string
+        default: "Bug fixes and performance improvements."
 
 permissions:
   contents: write
@@ -34,6 +40,20 @@ jobs:
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "tag_name=v$VERSION_NAME" >> $GITHUB_OUTPUT
 
+      - name: Prepare Release Notes
+        id: release_notes
+        run: |
+          if [ -f "RELEASE_NOTES.md" ]; then
+            NOTES=$(cat RELEASE_NOTES.md)
+          elif [ -f "whats_new.txt" ]; then
+            NOTES=$(cat whats_new.txt)
+          else
+            NOTES="${{ inputs.whats_new }}"
+          fi
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Build Release APK
         run: ./gradlew assembleRelease
         env:
@@ -48,7 +68,9 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.tag_name }}
           name: Release ${{ steps.get_version.outputs.tag_name }}
           body: |
-            Automated release for version ${{ steps.get_version.outputs.version_name }}.
+            ## What's New 🚀
+
+            ${{ steps.release_notes.outputs.notes }}
           files: |
             app/build/outputs/apk/release/*.apk
           draft: false
