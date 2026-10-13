@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base Palette (Day Mode) -->
+    <color name="liquid_bg_dark_start">#F1F5F9</color>
+    <color name="liquid_bg_dark_center">#E2E8F0</color>
+    <color name="liquid_bg_dark_end">#F8FAFC</color>
+
+    <!-- Surface Tokens (Day Mode) -->
+    <color name="surface_card">#FFFFFF</color>
+    <color name="surface_card_pressed">#F1F5F9</color>
+    <color name="surface_header">#E2E8F0</color>
+    <color name="surface_search">#E2E8F0</color>
+    <color name="stroke_color">#CBD5E1</color>
+
+    <!-- Legacy Glass Color Aliases -->
+    <color name="glass_surface">@color/surface_card</color>
+    <color name="glass_surface_light">@color/surface_card_pressed</color>
+    <color name="glass_surface_header">@color/surface_header</color>
+    <color name="glass_stroke">@color/stroke_color</color>
+    <color name="glass_stroke_light">@color/stroke_color</color>
+    <color name="glass_stroke_glow">@color/liquid_cyan</color>
+
+    <!-- Vibrant Accent Colors -->
+    <color name="liquid_cyan">#0099B8</color>
+    <color name="liquid_blue">#0077CC</color>
+    <color name="liquid_purple">#6200EE</color>
+    <color name="liquid_magenta">#C200E0</color>
+
+    <!-- Text Colors (Day Mode) -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_hint">#94A3B8</color>
+
+    <!-- Standard Utility Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="badge_glow_bg">#260099B8</color>
+    <color name="duration_pill_bg">#CC000000</color>
+</resources>

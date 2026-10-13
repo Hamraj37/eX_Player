@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/controlsRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Top Bar -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_top_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="28dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:id="@+id/btnBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_back">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_back"
+                android:padding="6dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvPlayerTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="Sample Video Title.mp4" />
+
+        <FrameLayout
+            android:id="@+id/btnSubtitle"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_subtitles">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_subtitles"
+                android:padding="6dp"
+                android:src="@drawable/ic_subtitles"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnAudioTrack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_audio_track">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_audio_track"
+                android:padding="6dp"
+                android:src="@drawable/ic_audiotrack"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnAspectRatio"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_aspect_ratio">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_aspect_ratio"
+                android:padding="6dp"
+                android:src="@drawable/ic_aspect_ratio"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnSpeed"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_playback_speed">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_playback_speed"
+                android:padding="6dp"
+                android:src="@drawable/ic_speed"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <!-- Center Playback Action Controls -->
+    <LinearLayout
+        android:id="@+id/centerControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
+
+        <FrameLayout
+            android:id="@+id/btnPrev"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_previous">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_previous"
+                android:padding="8dp"
+                android:src="@drawable/ic_skip_previous"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnRewind10"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_rewind_10">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_rewind_10"
+                android:padding="8dp"
+                android:src="@drawable/ic_replay_10"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnPlayPause"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_play_pause">
+
+            <ImageView
+                android:id="@+id/ivPlayPause"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_play_pause"
+                android:padding="12dp"
+                android:src="@drawable/ic_play"
+                app:tint="@color/liquid_cyan" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnForward10"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_forward_10">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_forward_10"
+                android:padding="8dp"
+                android:src="@drawable/ic_forward_10"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btnNext"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/bg_control_btn"
+            android:contentDescription="@string/cd_next">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/cd_next"
+                android:padding="8dp"
+                android:src="@drawable/ic_skip_next"
+                app:tint="@color/white" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom Bar -->
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_bottom_bar"
+        android:orientation="vertical"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvCurrentTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="40dp"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="01:23" />
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="1000"
+                android:maxHeight="6dp"
+                android:minHeight="6dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:progressDrawable="@drawable/seekbar_track"
+                android:splitTrack="false"
+                android:thumb="@drawable/seekbar_thumb" />
+
+            <TextView
+                android:id="@+id/tvTotalTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="40dp"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="05:40" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/tvDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/bottomActionControls"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                tools:text="01:23 / 05:40" />
+
+            <LinearLayout
+                android:id="@+id/bottomActionControls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:id="@+id/btnOrientationChange"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_control_btn"
+                    android:contentDescription="@string/cd_orientation_change">
+
+                    <ImageView
+                        android:id="@+id/ivOrientationChange"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/cd_orientation_change"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_screen_rotation"
+                        app:tint="@color/white" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/btnBackgroundPlay"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_control_btn"
+                    android:contentDescription="@string/btn_background_play">
+
+                    <ImageView
+                        android:id="@+id/ivBackgroundPlay"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/btn_background_play"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_headset"
+                        app:tint="@color/liquid_cyan" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/btnPip"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_control_btn"
+                    android:contentDescription="@string/cd_pip">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/cd_pip"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_pip"
+                        app:tint="@color/white" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

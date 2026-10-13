@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cvVideoCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginVertical="6dp"
+        android:background="@drawable/bg_card_selector"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="10dp">
+
+        <!-- Thumbnail Container -->
+        <FrameLayout
+            android:id="@+id/thumbnailContainer"
+            android:layout_width="120dp"
+            android:layout_height="72dp"
+            android:background="@drawable/bg_thumbnail_frame"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivThumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_video_placeholder"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Corner8" />
+
+            <!-- Play Circle Overlay -->
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:alpha="0.8"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_play_circle" />
+
+            <!-- Duration Badge -->
+            <TextView
+                android:id="@+id/tvDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_duration_pill"
+                android:paddingStart="6dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="6dp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="02:45" />
+        </FrameLayout>
+
+        <!-- Title and Metadata Column -->
+        <LinearLayout
+            android:id="@+id/infoLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/thumbnailContainer"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                tools:text="Big Buck Bunny 1080p Ultra HD Video Sample.mp4" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvFileSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/liquid_cyan"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    tools:text="45.2 MB" />
+
+                <TextView
+                    android:id="@+id/tvBullet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bullet_separator"
+                    android:textColor="@color/text_hint"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvDateAdded"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    tools:text="Oct 12, 2024" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvPath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:ellipsize="start"
+                android:maxLines="1"
+                android:textColor="@color/text_hint"
+                android:textSize="11sp"
+                tools:text="/storage/emulated/0/Movies/BigBuckBunny.mp4" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

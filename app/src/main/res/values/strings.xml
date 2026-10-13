@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">eX Player</string>
+    <string name="subtitle_media_library">Liquid Glass Media Library</string>
+    <string name="search_hint">Search videos by title&#8230;</string>
+    <string name="permission_required_title">Storage Permission Needed</string>
+    <string name="permission_required_desc">eX Player needs permission to access your local video library and build your media gallery.</string>
+    <string name="btn_grant_permission">Grant Access</string>
+    <string name="no_videos_found">No videos found</string>
+    <string name="no_videos_found_sub">Pull down to refresh or check video files on your device.</string>
+    <string name="video_count_zero">0 Videos</string>
+    <string name="video_count_format">%1$d Videos</string>
+    <string name="video_count_single">1 Video</string>
+    <string name="bullet_separator">&#160;&#8226;&#160;</string>
+    <string name="player_title">Now Playing</string>
+
+    <string name="player_subtitle_selector">Subtitle Track Selector</string>
+    <string name="player_audio_selector">Audio Track Selector</string>
+    <string name="player_playback_speed">Playback Speed</string>
+    <string name="player_subtitles_off">Subtitles Off</string>
+    <string name="dialog_close">Close</string>
+    <string name="aspect_ratio_fit">Fit to Screen</string>
+    <string name="aspect_ratio_fill">Fill Screen</string>
+    <string name="aspect_ratio_zoom">Zoom</string>
+    <string name="aspect_ratio_fixed_width">Fixed Width</string>
+    <string name="aspect_ratio_fixed_height">Fixed Height</string>
+    <string name="background_play_enabled">Background Playback Enabled</string>
+    <string name="background_play_disabled">Background Playback Disabled</string>
+    <string name="btn_background_play">Play in Background</string>
+
+    <!-- Theme Selection Strings -->
+    <string name="theme_dialog_title">Choose Theme Mode</string>
+    <string name="theme_system">System Default</string>
+    <string name="theme_light">Light Mode</string>
+    <string name="theme_dark">Dark Mode</string>
+    <string name="cd_theme_toggle">Toggle Theme</string>
+
+    <!-- FAB / Resume Last Played -->
+    <string name="fab_continue_playing">Resume</string>
+    <string name="fab_continue_playing_title">Resume: %1$s</string>
+    <string name="cd_fab_continue_playing">Continue playing last video</string>
+    <string name="toast_no_last_played">No recent video to resume</string>
+
+    <!-- Accessibility Content Descriptions -->
+    <string name="cd_back">Back</string>
+    <string name="cd_play_pause">Play or Pause</string>
+    <string name="cd_subtitles">Subtitles</string>
+    <string name="cd_audio_track">Audio Track</string>
+    <string name="cd_aspect_ratio">Aspect Ratio</string>
+    <string name="cd_playback_speed">Playback Speed</string>
+    <string name="cd_previous">Previous</string>
+    <string name="cd_next">Next</string>
+    <string name="cd_rewind_10">Rewind 10 seconds</string>
+    <string name="cd_forward_10">Forward 10 seconds</string>
+    <string name="cd_orientation_change">Change Orientation</string>
+    <string name="cd_pip">Picture in Picture</string>
+</resources>

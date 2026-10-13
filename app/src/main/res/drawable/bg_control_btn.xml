@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/badge_glow_bg">
+    <item>
+        <selector>
+            <!-- Pressed State: Heightened Liquid Sheen and Cyan Rim Glow -->
+            <item android:state_pressed="true">
+                <layer-list>
+                    <!-- Base Frosted Glass Body -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="135"
+                                android:centerColor="#33FFFFFF"
+                                android:endColor="#260099B8"
+                                android:startColor="#66FFFFFF"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Top Liquid Surface Specular Reflection -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="270"
+                                android:centerColor="#40FFFFFF"
+                                android:endColor="#00FFFFFF"
+                                android:startColor="#B3FFFFFF"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Bottom Caustic Light Refraction -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="90"
+                                android:centerColor="#1000F2FE"
+                                android:endColor="#00FFFFFF"
+                                android:startColor="#4D00F2FE"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Outer Edge Highlight & Accent Stroke -->
+                    <item>
+                        <shape android:shape="oval">
+                            <stroke
+                                android:width="1.5dp"
+                                android:color="@color/liquid_cyan" />
+                        </shape>
+                    </item>
+                </layer-list>
+            </item>
+
+            <!-- Focused State: Bright Glass Reflection with Cyan Focus Ring -->
+            <item android:state_focused="true">
+                <layer-list>
+                    <!-- Base Frosted Glass Body -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="135"
+                                android:centerColor="#2EFFFFFF"
+                                android:endColor="#200099B8"
+                                android:startColor="#59FFFFFF"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Top Liquid Surface Specular Reflection -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="270"
+                                android:centerColor="#38FFFFFF"
+                                android:endColor="#00FFFFFF"
+                                android:startColor="#A0FFFFFF"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Bottom Caustic Light Refraction -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="90"
+                                android:centerColor="#0D00F2FE"
+                                android:endColor="#00FFFFFF"
+                                android:startColor="#3300F2FE"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Outer Edge Highlight & Accent Stroke -->
+                    <item>
+                        <shape android:shape="oval">
+                            <stroke
+                                android:width="1.5dp"
+                                android:color="@color/liquid_cyan" />
+                        </shape>
+                    </item>
+                </layer-list>
+            </item>
+
+            <!-- Default State: Frosted Liquid Glass with Specular Reflection -->
+            <item>
+                <layer-list>
+                    <!-- Base Frosted Glass Body -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="135"
+                                android:centerColor="#1AFFFFFF"
+                                android:endColor="#0D0099B8"
+                                android:startColor="#38FFFFFF"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Top Liquid Surface Specular Reflection -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="270"
+                                android:centerColor="#20FFFFFF"
+                                android:endColor="#00FFFFFF"
+                                android:startColor="#70FFFFFF"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Bottom Caustic Light Refraction -->
+                    <item>
+                        <shape android:shape="oval">
+                            <gradient
+                                android:angle="90"
+                                android:centerColor="#05FFFFFF"
+                                android:endColor="#00FFFFFF"
+                                android:startColor="#2AFFFFFF"
+                                android:type="linear" />
+                        </shape>
+                    </item>
+                    <!-- Outer Edge Highlight Stroke -->
+                    <item>
+                        <shape android:shape="oval">
+                            <stroke
+                                android:width="1dp"
+                                android:color="#5EFFFFFF" />
+                        </shape>
+                    </item>
+                </layer-list>
+            </item>
+        </selector>
+    </item>
+</ripple>
