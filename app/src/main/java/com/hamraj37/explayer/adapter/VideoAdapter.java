@@ -16,6 +16,7 @@ import com.hamraj37.explayer.databinding.ItemVideoBinding;
 import com.hamraj37.explayer.model.VideoItem;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
@@ -24,9 +25,15 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         void onVideoClick(VideoItem videoItem, int position, List<VideoItem> currentList);
     }
 
+    public static final int SORT_BY_TITLE = 0;
+    public static final int SORT_BY_DATE = 1;
+    public static final int SORT_BY_SIZE = 2;
+    public static final int SORT_BY_DURATION = 3;
+
     private final List<VideoItem> originalList = new ArrayList<>();
     private final List<VideoItem> filteredList = new ArrayList<>();
     private final OnVideoClickListener clickListener;
+    private String currentSearchQuery = "";
 
     public VideoAdapter(OnVideoClickListener clickListener) {
         this.clickListener = clickListener;
@@ -41,11 +48,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     public void filter(String query) {
+        currentSearchQuery = query != null ? query : "";
         filteredList.clear();
-        if (query == null || query.trim().isEmpty()) {
+        if (currentSearchQuery.trim().isEmpty()) {
             filteredList.addAll(originalList);
         } else {
-            String lowerQuery = query.toLowerCase().trim();
+            String lowerQuery = currentSearchQuery.toLowerCase().trim();
             for (VideoItem item : originalList) {
                 if (item.getTitle().toLowerCase().contains(lowerQuery) ||
                         item.getPath().toLowerCase().contains(lowerQuery)) {
@@ -54,6 +62,24 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             }
         }
         notifyDataSetChanged();
+    }
+
+    public void sortVideos(int sortBy) {
+        switch (sortBy) {
+            case SORT_BY_TITLE:
+                Collections.sort(originalList, (v1, v2) -> v1.getTitle().compareToIgnoreCase(v2.getTitle()));
+                break;
+            case SORT_BY_DATE:
+                Collections.sort(originalList, (v1, v2) -> Long.compare(v2.getDateAdded(), v1.getDateAdded()));
+                break;
+            case SORT_BY_SIZE:
+                Collections.sort(originalList, (v1, v2) -> Long.compare(v2.getSize(), v1.getSize()));
+                break;
+            case SORT_BY_DURATION:
+                Collections.sort(originalList, (v1, v2) -> Long.compare(v2.getDuration(), v1.getDuration()));
+                break;
+        }
+        filter(currentSearchQuery);
     }
 
     public List<VideoItem> getFilteredList() {

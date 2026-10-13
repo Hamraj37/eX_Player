@@ -32,6 +32,7 @@ import com.hamraj37.explayer.model.VideoItem;
 import com.hamraj37.explayer.viewmodel.VideoViewModel;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
     private ImageView btnClearSearch;
     private View headerToolbar;
     private View btnThemeToggle;
+    private View btnMoreMenu;
 
     private LinearLayout emptyStateLayout;
     private TextView tvEmptyTitle;
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
         setupPermissionLauncher();
         setupSearchAndRefresh();
         setupThemeToggle();
+        setupMoreMenu();
         setupFab();
 
         checkPermissionsAndLoadVideos();
@@ -97,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
         btnClearSearch = findViewById(R.id.btnClearSearch);
         headerToolbar = findViewById(R.id.headerToolbar);
         btnThemeToggle = findViewById(R.id.btnThemeToggle);
+        btnMoreMenu = findViewById(R.id.btnMoreMenu);
 
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
         tvEmptyTitle = findViewById(R.id.tvEmptyTitle);
@@ -199,6 +203,63 @@ public class MainActivity extends AppCompatActivity implements VideoAdapter.OnVi
         if (btnThemeToggle != null) {
             btnThemeToggle.setOnClickListener(v -> showThemeSelectionDialog());
         }
+    }
+
+    private void setupMoreMenu() {
+        if (btnMoreMenu != null) {
+            btnMoreMenu.setOnClickListener(this::showPopupMenu);
+        }
+    }
+
+    private void showPopupMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(this, anchor);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_main, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.action_refresh) {
+                checkPermissionsAndLoadVideos();
+                return true;
+            } else if (itemId == R.id.action_sort) {
+                showSortDialog();
+                return true;
+            } else if (itemId == R.id.action_theme) {
+                showThemeSelectionDialog();
+                return true;
+            } else if (itemId == R.id.action_about) {
+                showAboutDialog();
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show();
+    }
+
+    private void showSortDialog() {
+        String[] sortOptions = {
+                getString(R.string.sort_by_title),
+                getString(R.string.sort_by_date),
+                getString(R.string.sort_by_size),
+                getString(R.string.sort_by_duration)
+        };
+
+        new androidx.appcompat.app.AlertDialog.Builder(this, R.style.Widget_EXPlayer_Dialog)
+                .setTitle(R.string.sort_dialog_title)
+                .setItems(sortOptions, (dialog, which) -> {
+                    if (videoAdapter != null) {
+                        videoAdapter.sortVideos(which);
+                        updateVideoCountBadge(videoAdapter.getItemCount());
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void showAboutDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this, R.style.Widget_EXPlayer_Dialog)
+                .setTitle(R.string.about_dialog_title)
+                .setMessage(R.string.about_dialog_message)
+                .setPositiveButton(R.string.dialog_close, null)
+                .show();
     }
 
     private void showThemeSelectionDialog() {

@@ -27,7 +27,19 @@
     <string name="background_play_disabled">Background Playback Disabled</string>
     <string name="btn_background_play">Play in Background</string>
 
-    <!-- Theme Selection Strings -->
+    <!-- Overflow Menu & Sorting Strings -->
+    <string name="cd_more_options">More Options</string>
+    <string name="menu_refresh">Refresh Library</string>
+    <string name="menu_sort_by">Sort By&#8230;</string>
+    <string name="menu_theme">Choose Theme</string>
+    <string name="menu_about">About eX Player</string>
+    <string name="sort_dialog_title">Sort Videos By</string>
+    <string name="sort_by_title">Title (A - Z)</string>
+    <string name="sort_by_date">Date Added (Newest First)</string>
+    <string name="sort_by_size">File Size (Largest First)</string>
+    <string name="sort_by_duration">Duration (Longest First)</string>
+    <string name="about_dialog_title">About eX Player</string>
+    <string name="about_dialog_message">eX Player v1.0\n\nLiquid Glass Media Player featuring smooth ExoPlayer playback, PiP support, background audio, and modern UI controls.</string>
     <string name="theme_dialog_title">Choose Theme Mode</string>
     <string name="theme_system">System Default</string>
     <string name="theme_light">Light Mode</string>

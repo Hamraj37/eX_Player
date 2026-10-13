@@ -55,12 +55,30 @@
                     android:textSize="12sp" />
             </LinearLayout>
 
+            <!-- Video Count Badge -->
+            <TextView
+                android:id="@+id/tvVideoCountBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/btnThemeToggle"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_badge"
+                android:paddingStart="12dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="6dp"
+                android:text="@string/video_count_zero"
+                android:textColor="@color/liquid_cyan"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
             <!-- Theme Toggle Button -->
             <FrameLayout
                 android:id="@+id/btnThemeToggle"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_toStartOf="@id/tvVideoCountBadge"
+                android:layout_toStartOf="@id/btnMoreMenu"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_control_btn"
@@ -75,22 +93,24 @@
                     app:tint="@color/liquid_cyan" />
             </FrameLayout>
 
-            <!-- Video Count Badge -->
-            <TextView
-                android:id="@+id/tvVideoCountBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <!-- 3-Dot Overflow Menu Button -->
+            <FrameLayout
+                android:id="@+id/btnMoreMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:background="@drawable/bg_badge"
-                android:paddingStart="12dp"
-                android:paddingTop="6dp"
-                android:paddingEnd="12dp"
-                android:paddingBottom="6dp"
-                android:text="@string/video_count_zero"
-                android:textColor="@color/liquid_cyan"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+                android:background="@drawable/bg_control_btn"
+                android:contentDescription="@string/cd_more_options">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/cd_more_options"
+                    android:src="@drawable/ic_more_vert"
+                    app:tint="@color/liquid_cyan" />
+            </FrameLayout>
         </RelativeLayout>
 
         <!-- Search Bar -->
