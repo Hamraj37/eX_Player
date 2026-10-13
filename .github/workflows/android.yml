@@ -4,10 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       whats_new:
-        description: "What's new in this release"
+        description: "What's new (leave blank to auto-generate from git commits)"
         required: false
         type: string
-        default: "Bug fixes and performance improvements."
 
 permissions:
   contents: write
@@ -19,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -43,12 +44,24 @@ jobs:
       - name: Prepare Release Notes
         id: release_notes
         run: |
-          if [ -f "RELEASE_NOTES.md" ]; then
+          if [ -n "${{ inputs.whats_new }}" ]; then
+            NOTES="${{ inputs.whats_new }}"
+          elif [ -f "RELEASE_NOTES.md" ]; then
             NOTES=$(cat RELEASE_NOTES.md)
           elif [ -f "whats_new.txt" ]; then
             NOTES=$(cat whats_new.txt)
           else
-            NOTES="${{ inputs.whats_new }}"
+            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [ -n "$LAST_TAG" ]; then
+              echo "Fetching commits since tag: $LAST_TAG"
+              NOTES=$(git log --oneline --no-merges ${LAST_TAG}..HEAD | sed -E 's/^[a-f0-9]+ /- /')
+            else
+              echo "No previous tag found, fetching recent commits"
+              NOTES=$(git log --oneline --no-merges -n 10 | sed -E 's/^[a-f0-9]+ /- /')
+            fi
+            if [ -z "$NOTES" ]; then
+              NOTES="Bug fixes and performance improvements."
+            fi
           fi
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           echo "$NOTES" >> $GITHUB_OUTPUT
@@ -71,6 +84,7 @@ jobs:
             ## What's New 🚀
 
             ${{ steps.release_notes.outputs.notes }}
+          generate_release_notes: true
           files: |
             app/build/outputs/apk/release/*.apk
           draft: false
