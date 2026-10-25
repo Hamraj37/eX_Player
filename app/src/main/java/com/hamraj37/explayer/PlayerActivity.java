@@ -17,6 +17,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
+import android.media.audiofx.LoudnessEnhancer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -154,7 +155,10 @@ public class PlayerActivity extends AppCompatActivity {
     private boolean isHorizontalScroll = false;
     private boolean isLeftHalf = false;
     private float initialBrightness = 0.5f;
-    private int initialVolume = 0;
+    private LoudnessEnhancer loudnessEnhancer;
+    private int currentAudioSessionId = C.AUDIO_SESSION_ID_UNSET;
+    private int currentVolumePercent = -1;
+    private int initialVolumePercent = 100;
     private long initialSeekPosition = 0;
     private long targetSeekPosition = 0;
     private int touchSlop;
@@ -390,6 +394,13 @@ public class PlayerActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onAudioSessionIdChanged(int audioSessionId) {
+                if (currentVolumePercent > 100) {
+                    applyVolumePercent(currentVolumePercent);
+                }
+            }
+
+            @Override
             public void onPlaybackStateChanged(int playbackState) {
                 if (playbackState == Player.STATE_READY) {
                     updateDurationUI();
@@ -508,7 +519,17 @@ public class PlayerActivity extends AppCompatActivity {
                     initialSeekPosition = player.getCurrentPosition();
                     targetSeekPosition = initialSeekPosition;
                 }
-                initialVolume = audioManager != null ? audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) : 0;
+                int maxVol = audioManager != null ? audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) : 15;
+                int sysVol = audioManager != null ? audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) : 0;
+                int sysPercent = maxVol > 0 ? Math.round((sysVol / (float) maxVol) * 100) : 0;
+
+                if (sysVol < maxVol) {
+                    currentVolumePercent = sysPercent;
+                    setVolumeBoostDb(0);
+                } else if (currentVolumePercent < 100) {
+                    currentVolumePercent = 100;
+                }
+                initialVolumePercent = currentVolumePercent;
                 initialBrightness = getWindowBrightness();
                 return true;
             }
@@ -624,15 +645,62 @@ public class PlayerActivity extends AppCompatActivity {
             int percent = (int) (newBrightness * 100);
             showIndicatorPopup(R.drawable.ic_brightness, "Brightness", percent, percent + "%");
         } else {
-            int maxVol = audioManager != null ? audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) : 15;
-            int volChange = (int) (percentChange * maxVol);
-            int newVol = Math.max(0, Math.min(maxVol, initialVolume + volChange));
+            int volPercentChange = (int) (percentChange * 150);
+            int newVolPercent = Math.max(0, Math.min(200, initialVolumePercent + volPercentChange));
+
+            applyVolumePercent(newVolPercent);
+
+            int iconRes = newVolPercent == 0 ? R.drawable.ic_volume_mute : R.drawable.ic_volume_up;
+            String title = newVolPercent > 100 ? "Volume Boost" : "Volume";
+            showIndicatorPopup(iconRes, title, newVolPercent, 200, newVolPercent + "%");
+        }
+    }
+
+    private void applyVolumePercent(int volumePercent) {
+        this.currentVolumePercent = volumePercent;
+        int maxVol = audioManager != null ? audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) : 15;
+
+        if (volumePercent <= 100) {
+            int systemVol = Math.round((volumePercent / 100f) * maxVol);
             if (audioManager != null) {
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, systemVol, 0);
             }
-            int percent = (int) ((newVol / (float) maxVol) * 100);
-            int iconRes = newVol == 0 ? R.drawable.ic_volume_mute : R.drawable.ic_volume_up;
-            showIndicatorPopup(iconRes, "Volume", percent, percent + "%");
+            setVolumeBoostDb(0);
+        } else {
+            if (audioManager != null) {
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol, 0);
+            }
+            int boostPercent = volumePercent - 100;
+            int gainmB = (int) ((boostPercent / 100f) * 2000);
+            setVolumeBoostDb(gainmB);
+        }
+    }
+
+    private void setVolumeBoostDb(int gainmB) {
+        if (player == null) return;
+        int sessionId = player.getAudioSessionId();
+        if (sessionId == C.AUDIO_SESSION_ID_UNSET || sessionId == 0) return;
+
+        try {
+            if (loudnessEnhancer == null || currentAudioSessionId != sessionId) {
+                if (loudnessEnhancer != null) {
+                    try {
+                        loudnessEnhancer.release();
+                    } catch (Exception ignored) {}
+                }
+                currentAudioSessionId = sessionId;
+                loudnessEnhancer = new LoudnessEnhancer(sessionId);
+            }
+
+            if (gainmB > 0) {
+                loudnessEnhancer.setTargetGain(gainmB);
+                loudnessEnhancer.setEnabled(true);
+            } else {
+                loudnessEnhancer.setTargetGain(0);
+                loudnessEnhancer.setEnabled(false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -654,15 +722,20 @@ public class PlayerActivity extends AppCompatActivity {
         showIndicatorPopup(iconRes, "Seeking", progress, text);
     }
 
-    private void showIndicatorPopup(int iconRes, String title, int progress, String valueText) {
+    private void showIndicatorPopup(int iconRes, String title, int progress, int maxProgress, String valueText) {
         hideIndicatorHandler.removeCallbacksAndMessages(null);
         indicatorPopupLayout.setVisibility(View.VISIBLE);
         indicatorPopupLayout.setAlpha(1f);
 
         ivIndicatorIcon.setImageResource(iconRes);
         tvIndicatorText.setText(title);
+        pbIndicatorProgress.setMax(maxProgress);
         pbIndicatorProgress.setProgress(progress);
         tvIndicatorValue.setText(valueText);
+    }
+
+    private void showIndicatorPopup(int iconRes, String title, int progress, String valueText) {
+        showIndicatorPopup(iconRes, title, progress, 100, valueText);
     }
 
     private void hideIndicatorWithDelay() {
@@ -1473,6 +1546,13 @@ public class PlayerActivity extends AppCompatActivity {
             mediaSession = null;
         }
         BackgroundPlaybackService.setMediaSession(null);
+
+        if (loudnessEnhancer != null) {
+            try {
+                loudnessEnhancer.release();
+            } catch (Exception ignored) {}
+            loudnessEnhancer = null;
+        }
 
         if (player != null) {
             player.release();
